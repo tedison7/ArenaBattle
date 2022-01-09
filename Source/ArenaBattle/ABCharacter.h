@@ -19,6 +19,21 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	enum class EControlMode
+	{
+		Shoulder,
+		Quarter,
+	};
+
+	void SetControlMode(EControlMode NewControlMode);
+	EControlMode CurrentControlMode = EControlMode::Shoulder;
+	FVector DirectionToMove = FVector::ZeroVector;
+
+	float ArmLengthTo = 0.0f;
+	FRotator ArmRotationTo = FRotator::ZeroRotator;
+	float ArmLengthSpeed = 0.0f;
+	float ArmRotationSpeed = 0.0f;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -35,4 +50,8 @@ public:
 private:
 	void UpDown(float NewAxisValue);
 	void LeftRight(float NewAxisValue);
+	void LookUp(float NewAxisValue);
+	void Turn(float NewAxisValue);
+
+	void ViewChange();
 };
