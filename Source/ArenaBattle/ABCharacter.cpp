@@ -8,6 +8,7 @@
 #include "DrawDebugHelpers.h"
 #include "Components/WidgetComponent.h"
 #include "ABCharacterWidget.h"
+#include "ABAIController.h"
 
 // Sets default values
 AABCharacter::AABCharacter()
@@ -51,6 +52,9 @@ AABCharacter::AABCharacter()
 	}
 
 	SetControlMode(EControlMode::Quarter);
+
+	AIControllerClass = AABAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	ArmLengthSpeed = 3.0f;
 	ArmRotationSpeed = 10.0f;
@@ -214,6 +218,25 @@ void AABCharacter::SetWeapon(class AABWeapon* NewWeapon)
 	}
 }
 
+void AABCharacter::Attack()
+{
+	if (IsAttacking)
+	{
+		ABCHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
+		if (CanNextCombo)
+		{
+			IsComboInputOn = true;
+		}
+	}
+	else
+	{
+		ABCHECK(CurrentCombo == 0);
+		AttackStartComboState();
+		ABAnim->PlayAttackMontage();
+		ABAnim->JumpToAttackMontageSection(CurrentCombo);
+		IsAttacking = true;
+	}
+}
 
 void AABCharacter::UpDown(float NewAxisValue)
 {
@@ -292,32 +315,13 @@ void AABCharacter::ViewChange()
 	}
 }
 
-void AABCharacter::Attack()
-{
-	if (IsAttacking)
-	{
-		ABCHECK(FMath::IsWithinInclusive<int32>(CurrentCombo, 1, MaxCombo));
-		if (CanNextCombo)
-		{
-			IsComboInputOn = true;
-		}
-	}
-	else
-	{
-		ABCHECK(CurrentCombo == 0);
-		AttackStartComboState();
-		ABAnim->PlayAttackMontage();
-		ABAnim->JumpToAttackMontageSection(CurrentCombo);
-		IsAttacking = true;
-	}
-}
-
 void AABCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	ABCHECK(IsAttacking);
 	ABCHECK(CurrentCombo > 0);
 	IsAttacking = false;
 	AttackEndComboState();
+	OnAttackEnd.Broadcast();
 }
 
 void AABCharacter::AttackStartComboState()
