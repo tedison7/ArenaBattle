@@ -38,7 +38,7 @@ void UABCharacterStatComponent::SetNewLevel(int32 NewLevel)
 	if (nullptr != CurrentStatData)
 	{
 		Level = NewLevel;
-		//CurrentHP = CurrentStatData->MaxHP;
+		CurrentHP = CurrentStatData->MaxHP;
 		SetHP(CurrentStatData->MaxHP);
 	}
 	else
